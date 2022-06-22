@@ -60,6 +60,15 @@ export const actions = {
       throw error;
     }
   },
+
+  uploadLogo: async (_, fileData) => {
+    try {
+      const { data } = await AccountAPI.attachment(fileData);
+      return data.logo_url;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
 };
 
 export const mutations = {

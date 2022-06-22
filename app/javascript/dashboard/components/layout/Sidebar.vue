@@ -1,7 +1,7 @@
 <template>
   <aside class="woot-sidebar">
     <primary-sidebar
-      :logo-source="globalConfig.logoThumbnail"
+      :logo-source="accountLogo"
       :installation-name="globalConfig.installationName"
       :account-id="accountId"
       :menu-items="primaryMenuItems"
@@ -62,10 +62,15 @@ export default {
       globalConfig: 'globalConfig/get',
       inboxes: 'inboxes/getInboxes',
       accountId: 'getCurrentAccountId',
+      currentAccount: 'getCurrentAccount',
       currentRole: 'getCurrentRole',
       labels: 'labels/getLabelsOnSidebar',
       teams: 'teams/getMyTeams',
     }),
+    accountLogo() {
+      if (this.currentAccount.logo_url) return this.currentAccount.logo_url;
+      return this.globalConfig.logoThumbnail;
+    },
     activeCustomView() {
       if (this.activePrimaryMenu.key === 'contacts') {
         return 'contact';
@@ -125,6 +130,7 @@ export default {
     this.$store.dispatch('notifications/unReadCount');
     this.$store.dispatch('teams/get');
     this.$store.dispatch('attributes/get');
+    this.$store.dispatch('accounts/get');
     this.fetchCustomViews();
   },
 

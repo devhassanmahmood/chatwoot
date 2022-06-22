@@ -44,6 +44,14 @@ class Api::V1::AccountsController < Api::BaseController
     head :ok
   end
 
+  def upload_logo
+    if @account.update(logo: params[:attachment])
+      render json: { logo_url: rails_blob_path(@account.logo) }, status: :ok
+    else
+      render json: @account.errors.full_messages, status: 422
+    end
+  end
+
   private
 
   def fetch_account

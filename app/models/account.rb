@@ -81,6 +81,7 @@ class Account < ApplicationRecord
   before_validation :validate_limit_keys
   after_create_commit :notify_creation
   after_destroy :remove_account_sequences
+  has_one_attached :logo
 
   def agents
     users.where(account_users: { role: :agent })

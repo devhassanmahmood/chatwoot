@@ -1,6 +1,6 @@
 <template>
-  <div class="columns profile--settings">
-    <form v-if="!uiFlags.isFetchingItem" @submit.prevent="updateAccount">
+  <div v-if="!uiFlags.isFetchingItem" class="columns profile--settings">
+    <form @submit.prevent="updateAccount">
       <div class="small-12 row profile--settings--row">
         <div class="columns small-3">
           <h4 class="block-title">
@@ -92,17 +92,6 @@
           <woot-code :script="getAccountId" />
         </div>
       </div>
-      <div class="current-version">
-        <div>{{ `v${globalConfig.appVersion}` }}</div>
-        <div v-if="hasAnUpdateAvailable && globalConfig.displayManifest">
-          {{
-            $t('GENERAL_SETTINGS.UPDATE_CHATWOOT', {
-              latestChatwootVersion: latestChatwootVersion,
-            })
-          }}
-        </div>
-      </div>
-
       <woot-submit-button
         class="button nice success button--fixed-right-top"
         :button-text="$t('GENERAL_SETTINGS.SUBMIT')"
@@ -110,6 +99,41 @@
       />
     </form>
 
+    <div class="profile--settings--row row">
+      <div class="columns small-3">
+        <h4 class="block-title">
+          {{ $t('GENERAL_SETTINGS.FORM.LOGO.TITLE') }}
+        </h4>
+        <p>
+          {{ $t('GENERAL_SETTINGS.FORM.LOGO.NOTE') }}
+        </p>
+      </div>
+      <div class="columns small-3">
+        <input
+          id="account-logo"
+          ref="logo"
+          type="file"
+          name="attachment"
+          accept="image/png, image/jpeg"
+        />
+      </div>
+      <div class="columns small-3">
+        <button class="button nice success" @click="updateLogo">
+          {{ $t('GENERAL_SETTINGS.FORM.LOGO.UPLOAD_IMAGE') }}
+        </button>
+      </div>
+    </div>
+
+    <div class="current-version">
+      <div>{{ `v${globalConfig.appVersion}` }}</div>
+      <div v-if="hasAnUpdateAvailable && globalConfig.displayManifest">
+        {{
+          $t('GENERAL_SETTINGS.UPDATE_CHATWOOT', {
+            latestChatwootVersion: latestChatwootVersion,
+          })
+        }}
+      </div>
+    </div>
     <woot-loading-state v-if="uiFlags.isFetchingItem" />
   </div>
 </template>
@@ -134,6 +158,7 @@ export default {
       features: {},
       autoResolveDuration: null,
       latestChatwootVersion: null,
+      logo: '',
     };
   },
   validations: {
@@ -153,6 +178,8 @@ export default {
       globalConfig: 'globalConfig/get',
       getAccount: 'accounts/getAccount',
       uiFlags: 'accounts/getUIFlags',
+      currentUser: 'getCurrentUser',
+      currentAccount: 'getCurrentAccount',
     }),
     hasAnUpdateAvailable() {
       if (!semver.valid(this.latestChatwootVersion)) {
@@ -192,6 +219,23 @@ export default {
     }
   },
   methods: {
+    async updateLogo() {
+      try {
+        const file = this.$refs.logo.files[0];
+        const formData = new FormData();
+        const account_id = this.getAccountId;
+        formData.append('attachment', file, file.name);
+        const logoUrl = await this.$store.dispatch('accounts/uploadLogo', {
+          file: formData,
+          id: account_id,
+        });
+
+        this.currentAccount.logo_url = logoUrl;
+      } catch (error) {
+        this.showAlert(error);
+      }
+    },
+
     async initializeAccount() {
       try {
         await this.$store.dispatch('accounts/get');

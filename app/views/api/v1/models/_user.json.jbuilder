@@ -27,5 +27,6 @@ json.accounts do
     # availability derived from presence
     json.availability_status account_user.availability_status
     json.auto_offline account_user.auto_offline
+    json.logo_url account_user.account.logo.attached? ? url_for(account_user.account.logo) : ''
   end
 end

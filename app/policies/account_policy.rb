@@ -10,4 +10,8 @@ class AccountPolicy < ApplicationPolicy
   def update_active_at?
     true
   end
+
+  def upload_logo?
+    @account_user.administrator?
+  end
 end
